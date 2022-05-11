@@ -3,11 +3,12 @@
 */
 
 #@ File (label = "Input directory", style = "directory") input
-//#@ File (label = "Output directory", style = "directory") output
-#@ String (label = "File suffix", value = ".png") suffix
+//#@ String (label = "Image type", value = ".png") suffix
+#@ String (label = "Channel color (lowercase)", value = "red") ch_color
+#@ Float (label="Enhance contrast", value = 0.35) contrast_enhance
 #@ Integer (label="Outlier radius", value = 6) outlier_radius
 #@ Integer (label="Outlier threshold", value = 30) outlier_threshold
-#@ Integer (label="Median filter radius", value = 3) median_filter_radius
+#@ Integer (label="Gaussian Median filter radius", value = 3) median_filter_radius
 #@ Integer (label="Prominence (Find Maxima)", value = 35) maxima_prominence
 	
 processFolder(input, outlier_radius, outlier_threshold, median_filter_radius, maxima_prominence);
@@ -15,6 +16,7 @@ processFolder(input, outlier_radius, outlier_threshold, median_filter_radius, ma
 // function to scan folders/subfolders/files to find files with correct suffix
 function processFolder(input, outlier_radius, outlier_threshold, median_filter_radius, maxima_prominence) {
 	//	set up params
+	suffix = ".png";
 	list = getFileList(input);
 	count_path = File.getParent(input) + "/counts/";
 	label_path = File.getParent(input) + "/labels/";
@@ -56,17 +58,17 @@ function countImage(input, file, outlier_radius, outlier_threshold, median_filte
 	label_path = File.getParent(input) + "/labels/";
 	img_file = input + File.separator + list[i];
 
-	//	get fos image from red channel
+	//	get image from channel
 	open(img_file);
 	run("Split Channels");
-	fos_ch = list[i] + " (red)";
-	selectWindow(fos_ch);
+	cell_ch = list[i] + " (" + ch_color + ")";
+	selectWindow(cell_ch);
 	//	pre-process: enhance contrast, remove outliers, median filter
-	run("Enhance Contrast", "saturated=0.35");
+	run("Enhance Contrast", "saturated=&contrast_enhance");
 	run("Remove Outliers...", "radius=&outlier_radius threshold=&outlier_threshold which=Bright");
 	run("Median...", "radius=&median_filter_radius");
 	//	find maxima and save list to .csv
-	run("Find Maxima...", "prominence=35 exclude output=List");
+	run("Find Maxima...", "prominence=&maxima_prominence exclude output=List");
 	count_filename = count_path + filename + "_counts.csv";
 	saveAs("Results", count_filename);
 	print("Count data saved in " + count_filename);
