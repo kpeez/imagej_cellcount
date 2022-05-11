@@ -1,0 +1,67 @@
+# ImageJ Macros for cell quantification
+
+Macro-based method for semi-automated cell quantification from fluorescent images.
+
+Your directory should have the following structure (within the region folder)
+
+```ascii
+expeirment_folder/
+├── data/
+    └── images/
+        └── region/
+            ├── region_1/
+            │   ├── png-files
+            │   ├── roi-images
+            │   └── roi-data
+            ├── region_2/
+            │   └── ...
+            └── ...
+```
+
+Where:
+
+- `png-files`: directory containing all of the raw (or merged) color images
+- `roi-images`: directory where user-curated ROI images will be saved.
+- `roi-data`: directory containing an .roi file for each image
+  - this is used to calculate the area of each ROI (in pixels)
+
+## CreateAndSaveROI
+
+(Note: If the `roi-images` and `roi-data` folders are not there they will be created automatically when running CreateAndSaveROI)
+
+This macro is used to help speed up the user-curated creation of ROIs containing cells to quantify. In order to use it you must install it each time you open ImageJ/FIJI (Plugins > Macros > Install). It is recommended to next specify a keyboard shortcut for easier use (e.g., I use F1).
+
+To use:
+
+1. Select an area on the image using one of the selection tools -- polygon is suggested for most flexibility but rectangle or oval can also be used.
+2. Clear the area outside of the ROI selection with  `Edit > Clear Outside`
+   - For batch processing of images I suggest creating a keyboard shortcut to save time (e.g., I use F2).
+
+- The new ROI will be saved in roi-images as `filename_ROI.png`.
+- The ROI data will saved in roi-data as `filename.roi`.
+- **Note:** Make sure the type of images you are processing is correctly set in the `image_type` parameter (e.g., "png", "tiff")
+
+## GetAreaROI
+
+Now that you have a directory of .roi files associated with each image, you can use this macro to generate a .csv file containing each image in one column (Label) as well the area (in pixels) of the ROI for that image. All you need to do to run this macro is either:
+
+1. Double-click the GetAreaROI.ijm file to open it in the ImageJ edit > select Run and use the pop-up menu to select the `roi-data` folder you want to analyze.
+2. Install in ImageJ and run the macro. Again you will then use the pop-up menu to select the `roi-data` folder you want to analyze.
+
+## CountCells
+
+NOTE: This macro will likely require you to test different parameter values until you find a set of parameters that gives you reliable labeling.
+
+### Parameters
+
+1. Double-click the CountCells.ijm and select Run.
+2. Select the `Input directory` -- this is the `roi-images` folder containing user-defined ROI images from the `CreateAndSaveROI` macro.
+3. Next, enter the parameter values in each field and click OK.
+4. Once the program starts, it will load each file in `roi-images`, apply the processing steps (Outlier removal > Median filter > Find Maxima) on each image.
+   - An image (`filename_ROI_labels.tif`) containing labels for each identified cell will be created in the `./labels` folder.
+   - A `filename_ROI_counts.csv` file contaning the X and Y coordinates of each detected cell will be created in the `./counts` folder.
+   - A `cell_count_params.txt` file will be saved in the input folder containing the values used to quantify the images.
+
+## Additional analyses
+
+Now that you have a file containing the coordinates of identified cells in each ROI, and the area of the ROI, you can analyze these .csv files in R, python, MATLAB, etc. In order to make sure the counts from each ROI are accurate it is suggested that you normalize the counts by dividng the # of cells in an ROI with the size of the ROI.
