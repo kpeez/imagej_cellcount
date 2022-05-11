@@ -39,6 +39,8 @@ Steps:
    - Next, outlier pixels are removed (useful for images with small bright spots that can be mis-identified as cells).
    - A Gaussian blur filter is applied to the image
    - Find maxima is used to identify spots
+3. Run `GetAreaROI.ijm` to get the area (in pixels) of the ROI assocaited with each image.
+   - Note: The conversion factor from pixels -> µm will depend on your microscope.
 
 ## SaveROI
 
