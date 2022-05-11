@@ -1,0 +1,13 @@
+# datasets
+datasets
+*.csv
+
+# IDE temp files #
+.vscode/
+
+# OS generated files #
+######################
+.directory
+.DS_Store
+Icon?
+Thumbs.db
